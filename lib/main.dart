@@ -7,6 +7,7 @@ import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/auth/controllers/auth_controller.dart';
+import 'features/home/controllers/doctor_controller.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -18,6 +19,7 @@ Future<void> main() async {
 
   Get.put(ThemeController());
   Get.put(AuthController(), permanent: true);
+  Get.put(DoctorController(), permanent: true);
 
   runApp(const InternGrowHospitalApp());
 }
