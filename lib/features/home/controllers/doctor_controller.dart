@@ -41,7 +41,7 @@ class DoctorController extends GetxController {
     return doctors.map((d) => d.specialization).toSet().toList()..sort();
   }
 
-  List<Doctor> byS­pecialization(String specialization) {
+  List<Doctor> bySpecialization(String specialization) {
     return doctors.where((d) => d.specialization == specialization).toList();
   }
 }
