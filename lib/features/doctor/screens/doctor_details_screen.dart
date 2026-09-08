@@ -36,6 +36,10 @@ class DoctorDetailsScreen extends StatelessWidget {
                 imageUrl: doctor.photoUrl,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                errorWidget: (context, url, error) => Container(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                  child: Icon(Icons.person, size: 80, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                ),
               ),
             ),
           ),
