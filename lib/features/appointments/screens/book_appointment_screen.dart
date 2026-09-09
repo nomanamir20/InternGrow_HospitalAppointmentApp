@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
+import '../../../shared/widgets/scaffold_with_nav_bar.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/appointment_model.dart';
@@ -73,9 +73,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     );
 
+    // Signal which appointment to highlight, since Appointment History
+    // isn't a standalone route — it's a tab inside the shared bottom-nav
+    // shell, so we switch tabs directly rather than trying to navigate to
+    // a route that doesn't independently exist.
+    _controller.justBookedAppointmentId.value = appointment.id;
+
     setState(() => _isBooking = false);
 
-    Get.offNamed('${AppRoutes.appointmentHistory}?justBooked=${appointment.id}');
+    // We're currently on the /book-appointment route (pushed on top of the
+    // shell), so offAllNamed to /home correctly clears back to the shell —
+    // this only fails as a no-op when called FROM WITHIN the shell itself.
+    Get.offAllNamed(AppRoutes.home);
+    Get.find<NavShellController>().changeTab(1); // switch to the History tab
+
     Get.snackbar(
       'Appointment Booked',
       'Your appointment with ${doctor.fullName} is confirmed.',

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/appointment_model.dart';
+import '../../../shared/widgets/scaffold_with_nav_bar.dart';
 import '../controllers/appointment_controller.dart';
 
 class AppointmentHistoryScreen extends StatefulWidget {
@@ -19,7 +19,6 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
     with SingleTickerProviderStateMixin {
   late final AppointmentController _controller;
   late final TabController _tabController;
-  String? _justBookedId;
 
   @override
   void initState() {
@@ -27,12 +26,11 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
     _controller = Get.find<AppointmentController>();
     _tabController = TabController(length: 2, vsync: this);
 
-    _justBookedId = Get.parameters['justBooked'];
-    if (_justBookedId != null) {
-      // Clear the highlight after a few seconds so it doesn't linger
-      // indefinitely on repeat visits to this screen.
+    // If a booking just happened, clear the highlight after a few seconds
+    // so it doesn't linger indefinitely on repeat visits to this tab.
+    if (_controller.justBookedAppointmentId.value != null) {
       Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _justBookedId = null);
+        _controller.justBookedAppointmentId.value = null;
       });
     }
   }
@@ -60,6 +58,12 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
     }
   }
 
+  void _goFindADoctor() {
+    // Same shell, different tab — switch directly instead of "navigating"
+    // to a route we're already inside.
+    Get.find<NavShellController>().changeTab(0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,14 +83,16 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
           children: [
             _AppointmentList(
               appointments: _controller.upcoming,
-              justBookedId: _justBookedId,
+              justBookedId: _controller.justBookedAppointmentId.value,
               onCancel: _confirmCancel,
+              onFindDoctor: _goFindADoctor,
               emptyMessage: 'No upcoming appointments.',
             ),
             _AppointmentList(
               appointments: _controller.past,
               justBookedId: null,
               onCancel: null,
+              onFindDoctor: null,
               emptyMessage: 'No past appointments yet.',
             ),
           ],
@@ -100,12 +106,14 @@ class _AppointmentList extends StatelessWidget {
   final List<Appointment> appointments;
   final String? justBookedId;
   final void Function(Appointment)? onCancel;
+  final VoidCallback? onFindDoctor;
   final String emptyMessage;
 
   const _AppointmentList({
     required this.appointments,
     required this.justBookedId,
     required this.onCancel,
+    required this.onFindDoctor,
     required this.emptyMessage,
   });
 
@@ -124,10 +132,10 @@ class _AppointmentList extends StatelessWidget {
               Icon(Icons.calendar_today_outlined, size: 56, color: subTextColor),
               const SizedBox(height: 16),
               Text(emptyMessage, style: TextStyle(color: subTextColor)),
-              if (onCancel != null) ...[
+              if (onFindDoctor != null) ...[
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => Get.offAllNamed(AppRoutes.home),
+                  onPressed: onFindDoctor,
                   child: const Text('Find a Doctor'),
                 ),
               ],

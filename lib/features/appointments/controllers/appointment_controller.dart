@@ -9,6 +9,7 @@ class AppointmentController extends GetxController {
   static const _prefsKey = 'appointments';
 
   final RxList<Appointment> appointments = <Appointment>[].obs;
+  final RxnString justBookedAppointmentId = RxnString();
 
   @override
   void onInit() {
