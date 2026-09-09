@@ -21,7 +21,7 @@ mobile architecture and Firebase integration patterns for a healthcare-style app
 - [ ] Medical History
 - [ ] Notifications
 - [x] Search Doctors
-- [ ] Appointment History
+- [x] Appointment History
 
 ### Upgrade Features
 - [ ] Video Consultation UI (real Jitsi Meet integration)
