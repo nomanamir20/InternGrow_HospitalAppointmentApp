@@ -16,7 +16,7 @@ mobile architecture and Firebase integration patterns for a healthcare-style app
 ## ✨ Features
 
 - [x] Doctor Listing
-- [ ] Appointment Booking
+- [x] Appointment Booking
 - [ ] Patient Profile
 - [ ] Medical History
 - [ ] Notifications
