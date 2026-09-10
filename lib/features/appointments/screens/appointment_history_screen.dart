@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../../shared/widgets/scaffold_with_nav_bar.dart';
 import '../controllers/appointment_controller.dart';
+import '../../../core/routes/app_routes.dart';
 
 class AppointmentHistoryScreen extends StatefulWidget {
   const AppointmentHistoryScreen({super.key});
@@ -282,7 +283,7 @@ class _AppointmentCard extends StatelessWidget {
                 if (isVideo) const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => Get.toNamed('/prescription-viewer/${appointment.id}'),
+                    onPressed: () => Get.toNamed('${AppRoutes.qrToken}/${appointment.id}'),
                     icon: const Icon(Icons.qr_code, size: 16),
                     label: const Text('QR Token'),
                   ),

@@ -13,4 +13,5 @@ abstract class AppRoutes {
   static const notifications = '/notifications';
   static const prescriptionViewer = '/prescription-viewer';
   static const videoConsultation = '/video-consultation';
+  static const qrToken = '/qr-token';
 }

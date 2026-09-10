@@ -25,7 +25,7 @@ mobile architecture and Firebase integration patterns for a healthcare-style app
 
 ### Upgrade Features
 - [ ] Video Consultation UI (real Jitsi Meet integration)
-- [ ] QR Appointment Token
+- [x] QR Appointment Token
 - [ ] Prescription Viewer
 - [ ] Firebase Authentication
 

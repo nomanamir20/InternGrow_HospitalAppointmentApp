@@ -6,6 +6,7 @@ import '../../features/search/screens/search_screen.dart';
 import '../../features/doctor/screens/doctor_details_screen.dart';
 import '../../features/appointments/screens/book_appointment_screen.dart';
 import '../../features/prescription/screens/prescription_viewer_screen.dart';
+import '../../features/appointments/screens/qr_token_screen.dart';
 import '../../features/video_call/screens/video_consultation_screen.dart';
 import '../../shared/widgets/scaffold_with_nav_bar.dart';
 import '../../shared/widgets/splash_screen.dart';
@@ -28,6 +29,11 @@ class AppPages {
     GetPage(
       name: '${AppRoutes.prescriptionViewer}/:appointmentId',
       page: () => PrescriptionViewerScreen(appointmentId: Get.parameters['appointmentId'] ?? ''),
+    ),
+        GetPage(name: AppRoutes.bookAppointment, page: () => const BookAppointmentScreen()),
+    GetPage(
+      name: '${AppRoutes.qrToken}/:appointmentId',
+      page: () => QrTokenScreen(appointmentId: Get.parameters['appointmentId'] ?? ''),
     ),
     GetPage(
       name: '${AppRoutes.videoConsultation}/:appointmentId',
