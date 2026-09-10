@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../shared/widgets/scaffold_with_nav_bar.dart';
+import '../../../data/models/notification_model.dart';
+import '../../notifications/controllers/notification_controller.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/appointment_model.dart';
@@ -78,6 +80,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     // shell, so we switch tabs directly rather than trying to navigate to
     // a route that doesn't independently exist.
     _controller.justBookedAppointmentId.value = appointment.id;
+      Get.find<NotificationController>().addNotification(
+      type: NotificationType.appointmentBooked,
+      title: 'Appointment Confirmed',
+      body: 'Your appointment with ${doctor.fullName} on ${DateFormat('MMM d').format(_selectedDate)} at $_selectedTimeSlot is booked.',
+      relatedAppointmentId: appointment.id,
+    );
 
     setState(() => _isBooking = false);
 

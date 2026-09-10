@@ -2,7 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
+import '../../../data/models/notification_model.dart';
+import '../../notifications/controllers/notification_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../../shared/widgets/scaffold_with_nav_bar.dart';
@@ -41,7 +42,7 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
     super.dispose();
   }
 
-  Future<void> _confirmCancel(Appointment appointment) async {
+    Future<void> _confirmCancel(Appointment appointment) async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Cancel Appointment'),
@@ -55,6 +56,12 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen>
 
     if (confirmed == true) {
       _controller.cancelAppointment(appointment.id);
+      Get.find<NotificationController>().addNotification(
+        type: NotificationType.appointmentCancelled,
+        title: 'Appointment Cancelled',
+        body: 'Your appointment with ${appointment.doctorName} has been cancelled.',
+        relatedAppointmentId: appointment.id,
+      );
     }
   }
 

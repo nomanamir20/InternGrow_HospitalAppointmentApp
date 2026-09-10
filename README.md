@@ -19,7 +19,7 @@ mobile architecture and Firebase integration patterns for a healthcare-style app
 - [x] Appointment Booking
 - [x] Patient Profile
 - [x] Medical History
-- [ ] Notifications
+- [x] Notifications
 - [x] Search Doctors
 - [x] Appointment History
 

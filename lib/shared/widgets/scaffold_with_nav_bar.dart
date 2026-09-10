@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../core/theme/app_colors.dart';
+import '../../features/notifications/controllers/notification_controller.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/appointments/screens/appointment_history_screen.dart';
 import '../../features/medical_history/screens/medical_history_screen.dart';
@@ -57,8 +58,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
               label: 'History',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_outlined),
-              activeIcon: Icon(Icons.notifications),
+              icon: _NotificationBadgeIcon(icon: Icons.notifications_outlined),
+              activeIcon: _NotificationBadgeIcon(icon: Icons.notifications),
               label: 'Alerts',
             ),
             BottomNavigationBarItem(
@@ -68,6 +69,41 @@ class ScaffoldWithNavBar extends StatelessWidget {
             ),
           ],
         ),
+      );
+    });
+  }
+}
+class _NotificationBadgeIcon extends StatelessWidget {
+  final IconData icon;
+
+  const _NotificationBadgeIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final notificationController = Get.find<NotificationController>();
+
+    return Obx(() {
+      final count = notificationController.unreadCount;
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(icon),
+          if (count > 0)
+            Positioned(
+              right: -6,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                child: Text(
+                  count > 9 ? '9+' : '$count',
+                  style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
       );
     });
   }
