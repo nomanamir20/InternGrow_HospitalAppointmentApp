@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'features/medical_history/controllers/medical_history_controller.dart';
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
@@ -22,6 +22,7 @@ Future<void> main() async {
   Get.put(AuthController(), permanent: true);
   Get.put(DoctorController(), permanent: true);
   Get.put(AppointmentController(), permanent: true);
+  Get.put(MedicalHistoryController(), permanent: true);
   runApp(const InternGrowHospitalApp());
 }
 
