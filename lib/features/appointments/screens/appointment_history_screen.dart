@@ -268,7 +268,7 @@ class _AppointmentCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(appointment.notes!, style: TextStyle(color: subTextColor, fontSize: 12, fontStyle: FontStyle.italic)),
           ],
-          if (appointment.status == AppointmentStatus.upcoming) ...[
+          if (appointment.status == AppointmentStatus.upcoming) ... [
             const SizedBox(height: 12),
             Row(
               children: [
@@ -295,6 +295,17 @@ class _AppointmentCard extends StatelessWidget {
                   tooltip: 'Cancel',
                 ),
               ],
+            ),
+          ],
+          if (appointment.status == AppointmentStatus.completed) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Get.toNamed('${AppRoutes.prescriptionViewer}/${appointment.id}'),
+                icon: const Icon(Icons.description_outlined, size: 16),
+                label: const Text('View Prescription'),
+              ),
             ),
           ],
         ],

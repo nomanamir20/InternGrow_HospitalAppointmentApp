@@ -10,6 +10,7 @@ import 'features/auth/controllers/auth_controller.dart';
 import 'features/home/controllers/doctor_controller.dart';
 import 'features/appointments/controllers/appointment_controller.dart';
 import 'features/notifications/controllers/notification_controller.dart';
+import 'features/prescription/controllers/prescription_controller.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -25,6 +26,7 @@ Future<void> main() async {
   Get.put(AppointmentController(), permanent: true);
   Get.put(MedicalHistoryController(), permanent: true);
   Get.put(NotificationController(), permanent: true);
+  Get.put(PrescriptionController(), permanent: true);
   runApp(const InternGrowHospitalApp());
 }
 
