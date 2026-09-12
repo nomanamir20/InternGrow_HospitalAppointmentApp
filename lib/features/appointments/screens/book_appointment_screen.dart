@@ -2,13 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../../shared/widgets/scaffold_with_nav_bar.dart';
-import '../../../data/models/notification_model.dart';
-import '../../notifications/controllers/notification_controller.dart';
+
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/date_time_utils.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../../data/models/doctor_model.dart';
+import '../../../data/models/notification_model.dart';
+import '../../../shared/widgets/scaffold_with_nav_bar.dart';
+import '../../notifications/controllers/notification_controller.dart';
 import '../controllers/appointment_controller.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
@@ -22,7 +24,10 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   late final Doctor doctor;
   late final AppointmentController _controller;
 
-  DateTime _selectedDate = DateTime.now();
+  // Normalized to midnight — this widget only ever needs the CALENDAR day
+  // here; the actual appointment time comes from the selected time slot,
+  // combined together only at the moment of booking.
+  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   String? _selectedTimeSlot;
   ConsultationType _consultationType = ConsultationType.inPerson;
   final _notesController = TextEditingController();
@@ -47,7 +52,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   }
 
   List<DateTime> get _nextSevenDays {
-    return List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
+    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    return List.generate(7, (i) => today.add(Duration(days: i)));
   }
 
   bool _isDayAvailable(DateTime date) {
@@ -55,9 +61,33 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     return doctor.availableDays.contains(dayAbbrev);
   }
 
+  bool get _isSelectedDateToday {
+    final today = DateTime.now();
+    return _selectedDate.year == today.year && _selectedDate.month == today.month && _selectedDate.day == today.day;
+  }
+
+  /// A time slot is unavailable if it's already booked, OR if it's today
+  /// and that time has already passed — this is the actual missing check
+  /// that allowed booking "11:00 AM" after 11:13 AM had already happened.
+  bool _isSlotInThePast(String slot) {
+    if (!_isSelectedDateToday) return false;
+    final slotDateTime = combineDateAndTimeSlot(_selectedDate, slot);
+    return slotDateTime.isBefore(DateTime.now());
+  }
+
   void _handleBooking() {
     if (_selectedTimeSlot == null) {
       Get.snackbar('Select a Time', 'Please choose an available time slot.', snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    // Final safety check — in case something changed between selecting the
+    // slot and pressing Confirm (e.g. user left the screen open past the
+    // slot's time).
+    final appointmentDateTime = combineDateAndTimeSlot(_selectedDate, _selectedTimeSlot!);
+    if (appointmentDateTime.isBefore(DateTime.now())) {
+      Get.snackbar('Time Has Passed', 'That time slot is no longer available. Please choose another.', snackPosition: SnackPosition.BOTTOM);
+      setState(() => _selectedTimeSlot = null);
       return;
     }
 
@@ -68,19 +98,16 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       doctorName: doctor.fullName,
       doctorPhotoUrl: doctor.photoUrl,
       specialization: doctor.specialization,
-      date: _selectedDate,
+      date: appointmentDateTime, // now the REAL combined date+time
       timeSlot: _selectedTimeSlot!,
       consultationType: _consultationType,
       consultationFee: doctor.consultationFee,
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     );
 
-    // Signal which appointment to highlight, since Appointment History
-    // isn't a standalone route — it's a tab inside the shared bottom-nav
-    // shell, so we switch tabs directly rather than trying to navigate to
-    // a route that doesn't independently exist.
     _controller.justBookedAppointmentId.value = appointment.id;
-      Get.find<NotificationController>().addNotification(
+
+    Get.find<NotificationController>().addNotification(
       type: NotificationType.appointmentBooked,
       title: 'Appointment Confirmed',
       body: 'Your appointment with ${doctor.fullName} on ${DateFormat('MMM d').format(_selectedDate)} at $_selectedTimeSlot is booked.',
@@ -89,11 +116,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
     setState(() => _isBooking = false);
 
-    // We're currently on the /book-appointment route (pushed on top of the
-    // shell), so offAllNamed to /home correctly clears back to the shell —
-    // this only fails as a no-op when called FROM WITHIN the shell itself.
     Get.offAllNamed(AppRoutes.home);
-    Get.find<NavShellController>().changeTab(1); // switch to the History tab
+    Get.find<NavShellController>().changeTab(1);
 
     Get.snackbar(
       'Appointment Booked',
@@ -116,7 +140,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Doctor summary card
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -236,8 +259,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 _TimeSlotChip(
                   label: slot,
                   isBooked: bookedSlots.contains(slot),
+                  isPast: _isSlotInThePast(slot),
                   isSelected: _selectedTimeSlot == slot,
-                  onTap: bookedSlots.contains(slot) ? null : () => setState(() => _selectedTimeSlot = slot),
+                  onTap: (bookedSlots.contains(slot) || _isSlotInThePast(slot))
+                      ? null
+                      : () => setState(() => _selectedTimeSlot = slot),
                 ),
             ],
           ),
@@ -305,16 +331,28 @@ class _ConsultationTypeCard extends StatelessWidget {
 class _TimeSlotChip extends StatelessWidget {
   final String label;
   final bool isBooked;
+  final bool isPast;
   final bool isSelected;
   final VoidCallback? onTap;
 
-  const _TimeSlotChip({required this.label, required this.isBooked, required this.isSelected, this.onTap});
+  const _TimeSlotChip({
+    required this.label,
+    required this.isBooked,
+    required this.isPast,
+    required this.isSelected,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
     final subTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final isDisabled = isBooked || isPast;
+
+    String displayLabel = label;
+    if (isBooked) displayLabel = '$label (Booked)';
+    if (isPast) displayLabel = '$label (Passed)';
 
     return InkWell(
       onTap: onTap,
@@ -327,12 +365,12 @@ class _TimeSlotChip extends StatelessWidget {
           border: Border.all(color: isSelected ? AppColors.primary : borderColor),
         ),
         child: Text(
-          isBooked ? '$label (Booked)' : label,
+          displayLabel,
           style: TextStyle(
-            color: isBooked ? subTextColor : (isSelected ? Colors.white : null),
+            color: isDisabled ? subTextColor : (isSelected ? Colors.white : null),
             fontWeight: FontWeight.w600,
             fontSize: 13,
-            decoration: isBooked ? TextDecoration.lineThrough : null,
+            decoration: isDisabled ? TextDecoration.lineThrough : null,
           ),
         ),
       ),
