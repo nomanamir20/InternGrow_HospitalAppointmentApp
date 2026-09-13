@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -32,15 +31,9 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
     final authController = Get.find<AuthController>();
     final appointment = appointmentController.byId(widget.appointmentId);
 
-    // A stable, unique room name per appointment — anyone with this exact
-    // URL can join, same as any real Jitsi meeting link. No account, no
-    // API key, no billing: meet.jit.si is Jitsi's free public server.
     final roomName = 'InternGrowHospital-${widget.appointmentId.substring(0, 8)}';
     final displayName = Uri.encodeComponent(authController.currentUser?.displayName ?? 'Patient');
 
-    // userInfo.displayName pre-fills the participant's name in the Jitsi
-    // UI; config params trim down Jitsi's own UI chrome for a cleaner
-    // embedded feel (no lobby prompt, no branding-heavy welcome page).
     final meetingUrl =
         'https://meet.jit.si/$roomName#userInfo.displayName=%22$displayName%22&config.prejoinPageEnabled=false&config.disableDeepLinking=true';
 
@@ -55,30 +48,23 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
           onPageFinished: (_) {
             if (mounted) setState(() => _isLoading = false);
           },
-          onWebResourceError: (_) 
-          {
-            if (mounted) {setState(() {
+          onWebResourceError: (_) {
+            if (mounted) setState(() {
               _isLoading = false;
               _hasError = true;
             });
-          }
           },
         ),
       )
       ..loadRequest(Uri.parse(meetingUrl));
 
     if (appointment == null) {
-      // Appointment lookup failing shouldn't block the call itself —
-      // the room name still works — but we note it for debugging.
       debugPrint('Warning: appointment ${widget.appointmentId} not found for video call context.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final subTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

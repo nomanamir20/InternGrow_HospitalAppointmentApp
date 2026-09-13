@@ -12,9 +12,19 @@ import 'features/appointments/controllers/appointment_controller.dart';
 import 'features/notifications/controllers/notification_controller.dart';
 import 'features/prescription/controllers/prescription_controller.dart';
 import 'firebase_options.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // webview_flutter_web sometimes needs explicit platform registration on
+  // web rather than relying purely on automatic plugin resolution — this
+  // is what "UnimplementedError: setJavaScriptMode" indicates when missing.
+  if (kIsWeb) {
+    WebViewPlatform.instance = WebWebViewPlatform();
+  }
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
