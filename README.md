@@ -29,6 +29,15 @@ mobile architecture and Firebase integration patterns for a healthcare-style app
 - [x] Prescription Viewer
 - [ ] Firebase Authentication
 
+### A note on Video Consultation
+
+Real embedded Jitsi Meet video calls work natively on Android via `webview_flutter`. On Flutter
+Web, browsers block camera/microphone access inside cross-origin iframes (a genuine browser
+security boundary, not a workaround-able bug), so the web version opens the real Jitsi call in
+a new browser tab instead — camera/mic permissions work normally there, since it's no longer
+sandboxed. Both paths use the same free, public Jitsi server (meet.jit.si) — no account,
+API key, or billing required either way.
+
 ---
 
 ## 🛠️ Tech Stack
