@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -37,9 +38,26 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
     final meetingUrl =
         'https://meet.jit.si/$roomName#userInfo.displayName=%22$displayName%22&config.prejoinPageEnabled=false&config.disableDeepLinking=true';
 
-    _webViewController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
+    _webViewController = WebViewController();
+
+    // webview_flutter_web genuinely does not implement setJavaScriptMode —
+    // browsers don't allow toggling JS the way native WebViews do, so this
+    // call throws UnimplementedError on web by design. Only call it on
+    // real native platforms (Android/iOS), where it IS supported and needed.
+    if (!kIsWeb) {
+      _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);
+    }
+
+    // setBackgroundColor has similarly patchy support across platforms —
+    // guard it individually so an unsupported call here can't crash the
+    // whole screen either.
+    try {
+      _webViewController.setBackgroundColor(Colors.black);
+    } catch (_) {
+      // Not supported on this platform — safe to ignore, purely cosmetic.
+    }
+
+    _webViewController
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
@@ -49,10 +67,12 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
             if (mounted) setState(() => _isLoading = false);
           },
           onWebResourceError: (_) {
-            if (mounted) setState(() {
-              _isLoading = false;
-              _hasError = true;
-            });
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+                _hasError = true;
+              });
+            }
           },
         ),
       )
