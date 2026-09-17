@@ -22,3 +22,14 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+plugins {
+   // DO NOT apply the Flutter plugin here; only define standard repositories/clean tasks
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
