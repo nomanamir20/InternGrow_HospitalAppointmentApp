@@ -24,7 +24,7 @@ tasks.register<Delete>("clean") {
 }
 
 plugins {
-   // DO NOT apply the Flutter plugin here; only define standard repositories/clean tasks
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
 allprojects {
