@@ -167,4 +167,7 @@ git clone https://github.com/nomanamir20/InternGrow_HospitalAppointmentApp.git
 
 ## 📌 Status
 
-🚧 In active development as part of the InternGrow Internship (Task 5 of 6).
+
+✅ Complete — developed as Task 5 of the InternGrow Mobile Development Internship.
+
+The application is currently maintained as a portfolio and demonstration project.
